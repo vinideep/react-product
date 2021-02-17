@@ -1,9 +1,33 @@
-import Header from "./header";
+import Products from "./product";
 import "./App.css";
 import "./style.css";
 import React from "react";
+import Womens from "./women";
+import Characters from './character'
 import { useState } from "react";
 
+
+
+const data = [];
+// womens data list api extracted using async fetch function
+const womensData = async function () {
+  const response = await fetch(
+    "https://randomuser.me/api/?gender=female&results=10"
+  );
+  const womenNames = await response.json();
+  return womenNames;
+};
+
+womensData().then((womenNames) => {
+  womenNames.results.map((women) => {
+    data.push({
+      name: women.name.first + " " + women.name.last,
+      womenImg: women.picture.medium,
+    });
+  });
+});
+
+// products array
 const products = [
   {
     id: 1,
@@ -67,37 +91,94 @@ const products = [
   },
 ];
 
-const App = () => {
+class App extends React.Component {
+  constructor(){
+    super()
+  };
+  state = {
+    showFruits: false,
+    showChar:false,
+    showWomens:false,
+    characters : []
+  }
 
-  const html = "<p>Hello programmers</p>"
-  const [value, setValue] = useState(false);
+componentDidMount(){
+  fetch(
+    "https://hp-api.herokuapp.com/api/characters"
+  )
+  .then(response => response.json())
+  .then(data => this.setState({characters: data}))
 
-  return (
+  
+}
+
+  render (){
+  return(
     <>
-    <div dangerouslySetInnerHTML = {{__html:html}}>
+      {/* <div dangerouslySetInnerHTML = {{__html:html}}>
 
-    </div>
+    </div> */}
       <button
         onClick={() => {
-          // value ? setValue(false):setValue(true)
-          setValue(!value)
+          this.setState({showFruits:!this.state.showFruits})
+          this.setState({showChar : false});
+          this.setState({showWomens : false});
         }}
       >
         Toggle Products
       </button>
+      <button
+        onClick={() => {
+          // value ? setValue(false):setValue(true)
+          this.setState({showWomens:!this.state.showWomens})
+          this.setState({showFruits : false});
+          this.setState({showChar : false});
+        }}
+      >
+        Toggle womenslist
+      </button>
+      <button
+        onClick={() => {
+          // value ? setValue(false):setValue(true)
+          this.setState({showChar:!this.state.showFruits})
+          this.setState({showFruits : false});
+          this.setState({showWomens : false});
+          // setValue(!value);
+        }}
+      >
+        Toggle characters
+      </button>
       <div className="app">
-        {value
+        {this.state.showFruits
           ? products.map((product) => {
               return (
-                <React.Fragment key={product.id}>
-                  <Header product={product} />
+                <React.Fragment key={Math.random()}>
+                  <Products product={product} />
+                </React.Fragment>
+              );
+            })
+          : null}
+        {this.state.showWomens
+          ? data.map((data) => {
+              return (
+                <React.Fragment key={Math.random()}>
+                  <Womens womendata={data} />
+                </React.Fragment>
+              );
+            })
+          : null}
+          {this.state.showChar
+          ? this.state.characters.map((character) => {
+              return (
+                <React.Fragment key={Math.random()}>
+                  <Characters characterlist={character} />
                 </React.Fragment>
               );
             })
           : null}
       </div>
     </>
-  );
+  )};
 };
 
 export default App;
